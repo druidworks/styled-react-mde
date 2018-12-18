@@ -1,0 +1,24 @@
+{
+  "name": "styled-react-mde",
+  "version": "1.0.0",
+  "description": "Markdown Editor using React & Styled components",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/druidworks/styled-react-mde.git"
+  },
+  "keywords": [
+    "mde",
+    "react",
+    "styled-components"
+  ],
+  "author": "druidworks",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/druidworks/styled-react-mde/issues"
+  },
+  "homepage": "https://github.com/druidworks/styled-react-mde#readme"
+}
