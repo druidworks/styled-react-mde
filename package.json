@@ -1,10 +1,12 @@
 {
   "name": "styled-react-mde",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Markdown Editor using React & Styled components",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "npm run build",
+    "clean": "rimraf ./_bundles && rimraf ./lib && rimraf ./lib-esm",
+    "build": "npm run clean && tsc && webpack"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,26 @@
   "bugs": {
     "url": "https://github.com/druidworks/styled-react-mde/issues"
   },
-  "homepage": "https://github.com/druidworks/styled-react-mde#readme"
+  "homepage": "https://github.com/druidworks/styled-react-mde#readme",
+  "peerDependencies": {
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3"
+  },
+  "devDependencies": {
+    "@types/react": "^16.7.17",
+    "@types/react-dom": "^16.0.11",
+    "fork-ts-checker-webpack-plugin": "^0.5.2",
+    "path": "^0.12.7",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "rimraf": "^2.6.2",
+    "source-map-loader": "^0.2.4",
+    "styled-components": "^4.1.3",
+    "ts-loader": "^5.3.1",
+    "tslint": "^5.12.0",
+    "typescript": "^3.2.2",
+    "typescript-plugin-styled-components": "^1.0.0",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
+  }
 }
