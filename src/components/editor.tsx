@@ -2,6 +2,7 @@ import * as React from "react";
 import { Key } from "ts-keycode-enum";
 
 export interface EditorProps {
+  content?: string;
   rows?: number;
   placeholder?: string;
   headless?: boolean;
@@ -30,7 +31,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   constructor(props: EditorProps) {
     super(props);
     this.state = {
-      content: "",
+      content: props.content || "",
       selection: { startOffset: 0, endOffset: 0 }
     };
     this.textarea = null;
@@ -154,12 +155,12 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     textareaRef: HTMLTextAreaElement,
     selection: EditorSelection
   ) {
-    textareaRef.selectionStart = selection.startOffset;
-    textareaRef.selectionEnd = selection.endOffset;
+    textareaRef.setSelectionRange(selection.startOffset, selection.endOffset);
   }
 
   private onKeyUp(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.ctrlKey) {
+      // e.stopPropagation();
       switch (e.keyCode) {
         case Key.B:
           this.wrapSelection("**", /\*\*/);
@@ -173,7 +174,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         case Key.Q:
           this.prefixLine(">");
           break;
-        case Key.P:
+        case Key.L:
           this.prefixLine("*");
           break;
       }
@@ -210,22 +211,24 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     return `${content.substr(0, start)}${text}${content.substr(end)}`;
   }
 
-  private updatedSelectedText(text: string, offset: number = 0) {
-    const selectionOffset = this.getSelectionOffset(offset);
+  private updatedSelectedText(text: string, start: number, length: number) {
     let content = this.state.content;
-    content = this.replaceSubString(
-      content,
-      text,
-      selectionOffset.start,
-      selectionOffset.end
+    const end = start + length;
+    content = this.replaceSubString(content, text, start, end);
+    this.updateState(
+      {
+        content,
+        selection: {
+          startOffset: start,
+          endOffset: end
+        }
+      },
+      () =>
+        this.setSelectionToDOM(this.textarea as HTMLTextAreaElement, {
+          startOffset: start,
+          endOffset: start
+        })
     );
-    this.updateState({
-      content,
-      selection: {
-        startOffset: selectionOffset.start,
-        endOffset: selectionOffset.end
-      }
-    });
   }
 
   private isTextWrapped(text: string, tag: string) {
@@ -234,30 +237,40 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private wrapSelection(tag: string, regexTag: RegExp) {
     const exactText = this.getSelectedText();
+    const exactTextTrimmed = exactText.trim();
     const offsetText = this.getSelectedText(2);
-    const isExactWrapped = this.isTextWrapped(exactText, tag);
+    const isExactWrapped = this.isTextWrapped(exactTextTrimmed, tag);
     const isOffsetWrapped = this.isTextWrapped(offsetText, tag);
     const removeTag = new RegExp(regexTag, "g");
-    console.log("wrapSelection: ", {
-      exactText,
-      isExactWrapped,
-      offsetText,
-      isOffsetWrapped
-    });
+    const selection = this.getSelectionOffset();
     if (isExactWrapped) {
-      this.updatedSelectedText(exactText.replace(removeTag, "")); // TODO: remove start & end tags only
+      this.updatedSelectedText(
+        exactTextTrimmed.replace(removeTag, ""),
+        selection.start + exactText.indexOf(exactTextTrimmed),
+        exactTextTrimmed.length
+      );
     } else if (isOffsetWrapped) {
-      this.updatedSelectedText(offsetText.replace(removeTag, ""), 2); // TODO: remove start & end tags only
-    } else if (exactText !== "") {
-      this.updatedSelectedText(`${tag}${exactText}${tag}`); // TODO: cater for white space on ends and move tags flush with word ends
+      const selectionLength = selection.end + 2 - (selection.start - 2);
+      this.updatedSelectedText(
+        offsetText.replace(removeTag, ""),
+        selection.start - 2,
+        selectionLength
+      );
+    } else if (exactTextTrimmed !== "") {
+      this.updatedSelectedText(
+        `${tag}${exactTextTrimmed}${tag}`,
+        selection.start + exactText.indexOf(exactTextTrimmed),
+        exactTextTrimmed.length
+      );
     }
   }
 
   private prefixLine(tag: string) {
     let content = this.state.content;
-    const lines = content.split(/\r|\r\n|\n/);
+    const lines = content.split(/\r\n|\n|\r/);
     const selection = this.state.selection;
 
+    let compoundedLength = 0;
     let currentLength = 0;
     let selectionStartFound = false;
     for (let index = 0; index < lines.length; index++) {
@@ -293,14 +306,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           content = this.replaceSubString(
             content,
             lineContent.replace(`${tag} `, ""),
-            lineStart > 0 ? lineStart + 1 : 0,
+            lineStart - compoundedLength,
             lineEnd
           );
         } else {
           content = this.replaceSubString(
             content,
             `${tag} ${lineContent}`,
-            lineStart > 0 ? lineStart + 1 : 0,
+            lineStart + compoundedLength,
             lineEnd
           );
         }
@@ -308,10 +321,22 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
       if (canBreak) {
         break;
+      } else if (!canBreak && canPrefix) {
+        compoundedLength += 2;
       }
 
-      currentLength += line.length;
+      let newLineOffset = 1;
+      const newLineCharacters = this.sliceContent(lineEnd, lineEnd + 2);
+      if (newLineCharacters.indexOf("\r\n") >= 0) {
+        newLineOffset = 2;
+      }
+      currentLength += line.length + newLineOffset;
     }
-    this.updateState({ content, selection });
+    this.updateState({ content, selection }, () =>
+      this.setSelectionToDOM(this.textarea as HTMLTextAreaElement, {
+        startOffset: selection.startOffset,
+        endOffset: selection.endOffset
+      })
+    );
   }
 }
