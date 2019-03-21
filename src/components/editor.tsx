@@ -1,10 +1,13 @@
 import * as React from "react";
 import { Key } from "ts-keycode-enum";
+import { StatusBar } from "../styledComponents/statusBar";
+import { EditorWrapper } from "../styledComponents/editorWrapper";
+
+export interface TextAreaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 export interface EditorProps {
-  content?: string;
-  rows?: number;
-  placeholder?: string;
+  textAreaProps: TextAreaProps;
   headless?: boolean;
   updateSelectionHandler: (selection: EditorSelection) => void;
 }
@@ -31,7 +34,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   constructor(props: EditorProps) {
     super(props);
     this.state = {
-      content: props.content || "",
+      content: this.cleanupContent(props.textAreaProps.value as string) || "",
       selection: { startOffset: 0, endOffset: 0 }
     };
     this.textarea = null;
@@ -43,23 +46,22 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   public render() {
     return (
-      <div>
+      <EditorWrapper>
         {!this.props.headless && <div>header</div>}
         <textarea
           ref={(c) => {
             this.textarea = c;
           }}
-          placeholder={this.props.placeholder}
-          rows={this.props.rows}
+          {...this.props.textAreaProps}
           value={this.state.content}
           onChange={this.onChange}
           onKeyUp={this.onKeyUp}
         />
-        <div>
-          selection: {this.state.selection.startOffset}:
+        <StatusBar>
+          Cursor: {this.state.selection.startOffset}:
           {this.state.selection.endOffset}
-        </div>
-      </div>
+        </StatusBar>
+      </EditorWrapper>
     );
   }
 
@@ -89,11 +91,25 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     removeEventListeners();
   }
 
+  private cleanupContent(content: string): string {
+    const nRegex = new RegExp(/\r(?!\n)/g);
+    if (content.match(nRegex)) {
+      content = content.replace(nRegex, "\r\n");
+    }
+
+    const rRegex = new RegExp(/(?<!\r)\n/g);
+    if (content.match(rRegex)) {
+      content = content.replace(rRegex, "\r\n");
+    }
+
+    return content;
+  }
+
   private updateState(newState: any, callback?: () => void) {
     if (newState && newState.content) {
       this.setState(
         Object.assign({}, newState, {
-          content: newState.content.replace(/ +/g, " ")
+          content: this.cleanupContent(newState.content).replace(/ +/g, " ")
         }),
         callback
       );
@@ -185,8 +201,16 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   private getSelectionOffset(offset: number = 0) {
     const selection = this.state.selection;
     const content = this.state.content;
-    const start = selection.startOffset - offset;
-    const end = selection.endOffset + offset;
+
+    const initialStart = selection.startOffset - offset;
+    const startNewLines = this.getNewlinesBetween(0, initialStart);
+    const start =
+      startNewLines > 1 ? initialStart + startNewLines : initialStart;
+
+    const initialEnd = selection.endOffset + offset;
+    const endNewLines = this.getNewlinesBetween(0, initialEnd);
+    const end = endNewLines > 1 ? initialEnd + endNewLines : initialEnd;
+
     return {
       start: start < 0 ? 0 : start,
       end: end > content.length ? content.length : end
@@ -195,6 +219,14 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private sliceContent(start: number, end: number) {
     return this.state.content.slice(start, end);
+  }
+
+  private getNewlinesBetween(start: number, end: number) {
+    const allContentUpToSelectionEnd = this.state.content.slice(start, end);
+    const newLineMatches = allContentUpToSelectionEnd.match(/\r\n/g);
+    return Array.isArray(newLineMatches) && newLineMatches.length > 0
+      ? newLineMatches.length
+      : 0;
   }
 
   private getSelectedText(offset: number = 0) {
@@ -243,6 +275,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     const isOffsetWrapped = this.isTextWrapped(offsetText, tag);
     const removeTag = new RegExp(regexTag, "g");
     const selection = this.getSelectionOffset();
+
     if (isExactWrapped) {
       this.updatedSelectedText(
         exactTextTrimmed.replace(removeTag, ""),
@@ -267,7 +300,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private prefixLine(tag: string) {
     let content = this.state.content;
-    const lines = content.split(/\r\n|\n|\r/);
+    const lines = content.split(/\r\n/);
     const selection = this.state.selection;
 
     let compoundedLength = 0;
