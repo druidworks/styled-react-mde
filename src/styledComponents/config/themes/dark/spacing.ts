@@ -11,6 +11,10 @@ const SPACING = {
     padding: "2px",
     margin: "0"
   },
+  preview: {
+    padding: "2px",
+    margin: "0"
+  },
   input: {
     padding: "0",
     margin: "0"

@@ -9,6 +9,7 @@ import EditorActionButton from "../styledComponents/editorActionButton";
 import EditorTextarea from "../styledComponents/editorTextarea";
 import StatusBarText from "../styledComponents/statusBarText";
 import StatusBarSeperator from "../styledComponents/statusBarSeperator";
+import EditorPreview from "../styledComponents/editorPreview";
 
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
@@ -69,7 +70,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           </EditorActionBar>
         )}
 
-        {this.state.isInPreview && <ReactMarkdown source={this.state.content} />}
+        {this.state.isInPreview && (
+          <EditorPreview>
+            <ReactMarkdown source={this.state.content} />
+          </EditorPreview>
+        )}
 
         {!this.state.isInPreview && (
           <EditorTextarea

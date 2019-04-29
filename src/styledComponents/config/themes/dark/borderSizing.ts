@@ -11,6 +11,10 @@ const BORDER_SIZING = {
     size: "1px",
     radius: "0"
   },
+  preview: {
+    size: "1px",
+    radius: "0"
+  },
   input: {
     size: "1px",
     radius: "0"

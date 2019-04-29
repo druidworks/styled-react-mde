@@ -4,6 +4,8 @@ import SPACING from "../config/themes/dark/spacing";
 
 const StyledEditorTextarea = styled.textarea`
   display: block;
+  height: auto;
+  width: 99.35%;
   background-color: ${COLORS.default.background};
   color: ${COLORS.default.foreground};
   border: none;
