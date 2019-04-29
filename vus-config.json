@@ -1,0 +1,14 @@
+{
+  "commands": [
+    {
+      "name": "addStyledComponent",
+      "command": "node ./vusCommands/index.js addStyledComponent",
+      "questions": [
+        {
+          "prompt": "What is your component name?",
+          "placeholder": "Enter component name..."
+        }
+      ]
+    }
+  ]
+}

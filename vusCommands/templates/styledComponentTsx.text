@@ -1,0 +1,8 @@
+import React from "react";
+import Styled<%componentName%> from "./style";
+
+interface <%componentName%>Props extends React.HTMLProps<HTMLDivElement> {}
+
+export default function <%componentName%>(props: <%componentName%>Props) {
+  return <Styled<%componentName%>>{props.children}</Styled<%componentName%>>;
+}

@@ -28,9 +28,12 @@
     "react-dom": "^16.6.3"
   },
   "devDependencies": {
+    "@types/markdown-to-jsx": "^6.9.0",
     "@types/react": "^16.7.17",
     "@types/react-dom": "^16.0.11",
     "@types/styled-components": "4.0.3",
+    "change-case": "^3.1.0",
+    "commander": "^2.20.0",
     "fork-ts-checker-webpack-plugin": "^0.5.2",
     "path": "^0.12.7",
     "react": "^16.6.3",
@@ -46,6 +49,8 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "markdown-to-jsx": "^6.9.3",
+    "react-markdown": "^4.0.8",
     "ts-keycode-enum": "^1.0.6"
   }
 }
