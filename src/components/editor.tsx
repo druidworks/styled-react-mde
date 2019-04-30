@@ -1,5 +1,4 @@
 import * as React from "react";
-// import Markdown from "markdown-to-jsx";
 import ReactMarkdown from "react-markdown";
 import { Key } from "ts-keycode-enum";
 import StatusBar from "../styledComponents/statusBar";
@@ -15,6 +14,7 @@ export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 
 export interface EditorProps {
   textAreaProps: TextAreaProps;
+  updateContent: (content: string, callback?: () => void) => void;
   characterLimit?: number;
   wordLimit?: number;
   headless?: boolean;
@@ -22,7 +22,6 @@ export interface EditorProps {
 }
 
 export interface EditorState {
-  content: string;
   selection: EditorSelection;
   isInPreview: boolean;
 }
@@ -44,7 +43,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   constructor(props: EditorProps) {
     super(props);
     this.state = {
-      content: this.cleanupContent(props.textAreaProps.value as string) || "",
       selection: { startOffset: 0, endOffset: 0 },
       isInPreview: false
     };
@@ -72,7 +70,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
         {this.state.isInPreview && (
           <EditorPreview>
-            <ReactMarkdown source={this.state.content} />
+            <ReactMarkdown source={this.getTextAreaContent()} />
           </EditorPreview>
         )}
 
@@ -82,7 +80,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
               this.textarea = c;
             }}
             {...this.props.textAreaProps}
-            value={this.state.content}
+            value={this.getTextAreaContent()}
             onChange={this.onChange}
             onKeyUp={this.onKeyUp}
           />
@@ -90,8 +88,6 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
         <StatusBar>
           <EditorActionButton onClickMethod={this.togglePreviewMode}>{this.state.isInPreview ? "Edit" : "Preview"}</EditorActionButton>
-          {!this.state.isInPreview && <StatusBarText>Cursor: {this.getCursorStatus()}</StatusBarText>}
-          <StatusBarSeperator />
           <StatusBarText>
             Words: {this.getWordCount()} {this.getWordLimit()}
           </StatusBarText>
@@ -99,6 +95,8 @@ export class Editor extends React.Component<EditorProps, EditorState> {
           <StatusBarText>
             Characters: {this.getCharacterCount()} {this.getCharacterLimit()}
           </StatusBarText>
+          {!this.state.isInPreview && <StatusBarSeperator />}
+          {!this.state.isInPreview && <StatusBarText>Cursor: {this.getCursorStatus()}</StatusBarText>}
         </StatusBar>
       </EditorWrapper>
     );
@@ -123,7 +121,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private addEventListeners() {
-    this.selectionUpdateEvents.forEach((eventType) => {
+    this.selectionUpdateEvents.forEach(eventType => {
       if (this.textarea !== null) {
         this.textarea.addEventListener(eventType, this.selectionUpdateListener);
       }
@@ -131,7 +129,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private removeEventListeners() {
-    this.selectionUpdateEvents.forEach((eventType) => {
+    this.selectionUpdateEvents.forEach(eventType => {
       if (this.textarea !== null) {
         this.textarea.removeEventListener(eventType, this.selectionUpdateListener);
       }
@@ -148,7 +146,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private getWordCount(content?: string) {
     const regex = new RegExp(/\w+/g);
-    const matches = (content ? content : this.state.content).match(regex);
+    const matches = (content ? content : this.getTextAreaContent()).match(regex);
     return matches === null ? 0 : matches.length;
   }
 
@@ -157,7 +155,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private getCharacterCount(content?: string) {
-    return (content ? content : this.state.content).length;
+    return (content ? content : this.getTextAreaContent()).length;
   }
 
   private getCursorStatus() {
@@ -194,12 +192,13 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private updateState(newState: any, callback?: () => void) {
     if (newState && newState.content) {
-      this.setState(
-        Object.assign({}, newState, {
-          content: this.cleanupContent(newState.content).replace(/ +/g, " ")
-        }),
-        callback
-      );
+      // this.setState(
+      //   Object.assign({}, newState, {
+      //     content: this.cleanupContent(newState.content).replace(/ +/g, " ")
+      //   }),
+      //   callback
+      // );
+      this.props.updateContent(this.cleanupContent(newState.content).replace(/ +/g, " "));
     } else {
       this.setState(newState, callback);
     }
@@ -302,7 +301,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private getSelectionOffset(offset: number = 0) {
     const selection = this.state.selection;
-    const content = this.state.content;
+    const content = this.getTextAreaContent();
 
     const initialStart = selection.startOffset - offset;
     const startNewLines = this.getNewlinesBetween(0, initialStart);
@@ -319,11 +318,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private sliceContent(start: number, end: number) {
-    return this.state.content.slice(start, end);
+    return this.getTextAreaContent().slice(start, end);
   }
 
   private getNewlinesBetween(start: number, end: number) {
-    const allContentUpToSelectionEnd = this.state.content.slice(start, end);
+    const allContentUpToSelectionEnd = this.getTextAreaContent().slice(start, end);
     const newLineMatches = allContentUpToSelectionEnd.match(/\r\n/g);
     return Array.isArray(newLineMatches) && newLineMatches.length > 0 ? newLineMatches.length : 0;
   }
@@ -338,7 +337,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private updatedSelectedText(text: string, start: number, length: number) {
-    let content = this.state.content;
+    let content = this.getTextAreaContent();
     const end = start + length;
     content = this.replaceSubString(content, text, start, end);
     this.updateState(
@@ -359,6 +358,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private isTextWrapped(text: string, tag: string) {
     return text.startsWith(tag) && text.endsWith(tag);
+  }
+
+  private getTextAreaContent(): string {
+    return this.cleanupContent(this.props.textAreaProps.value as string) || "";
   }
 
   private wrapSelection(tag: string, regexTag: RegExp) {
@@ -384,7 +387,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
 
   private prefixLine(tag: string) {
     if (!this.state.isInPreview) {
-      let content = this.state.content;
+      let content = this.getTextAreaContent();
       const lines = content.split(/\r\n/);
       const selection = this.state.selection;
 

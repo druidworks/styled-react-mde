@@ -4,6 +4,8 @@ import BORDER_SIZING from "../config/themes/dark/borderSizing";
 import COLORS from "../config/themes/dark/colors";
 
 const StyledEditorPreview = styled.div`
+  height: 200px;
+  overflow-y: auto;
   padding: ${SPACING.preview.padding};
   margin: ${SPACING.preview.margin};
   border-radius: ${BORDER_SIZING.preview.radius};
