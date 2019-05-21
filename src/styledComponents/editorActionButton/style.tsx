@@ -1,17 +1,14 @@
 import styled from "styled-components";
-import COLORS from "../config/themes/dark/colors";
-import BORDER_SIZING from "../config/themes/dark/borderSizing";
-import SPACING from "../config/themes/dark/spacing";
 
 const StyledEditorActionButton = styled.div`
   display: inline-block;
-  padding: ${SPACING.button.padding};
+  padding: ${(props) => props.theme.components.button.padding};
   margin: 0;
   width: 30px;
   text-align: center;
-  background-color: ${COLORS.default.background};
-  border-radius: ${BORDER_SIZING.button.radius};
-  color: ${COLORS.default.foreground};
+  background-color: ${(props) => props.theme.colors.default.background};
+  border-radius: ${(props) => props.theme.components.button.radius};
+  color: ${(props) => props.theme.colors.default.foreground};
 
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* Internet Explorer */
@@ -21,12 +18,12 @@ const StyledEditorActionButton = styled.div`
 
   &:hover {
     cursor: pointer;
-    background-color: ${COLORS.highlight.background};
-    color: ${COLORS.highlight.foreground};
+    background-color: ${(props) => props.theme.colors.highlight.background};
+    color: ${(props) => props.theme.colors.highlight.foreground};
   }
   &:active {
-    background-color: ${COLORS.active.background};
-    color: ${COLORS.active.foreground};
+    background-color: ${(props) => props.theme.colors.active.background};
+    color: ${(props) => props.theme.colors.active.foreground};
   }
 `;
 

@@ -1,14 +1,18 @@
 import React from "react";
 import StyledEditorPreview from "./style";
 import GradientBorderBox from "../gradientBorderBox";
-import BORDER_SIZING from "../config/themes/dark/borderSizing";
+import { ThemeConsumer } from "styled-components";
 
 interface EditorPreviewProps extends React.HTMLProps<HTMLDivElement> {}
 
 export default function EditorPreview(props: EditorPreviewProps) {
   return (
-    <GradientBorderBox width={BORDER_SIZING.preview.size} borderRadius={BORDER_SIZING.preview.radius}>
-      <StyledEditorPreview>{props.children}</StyledEditorPreview>
-    </GradientBorderBox>
+    <ThemeConsumer>
+      {(theme) => (
+        <GradientBorderBox width={theme.components.preview.size} borderRadius={theme.components.preview.radius}>
+          <StyledEditorPreview>{props.children}</StyledEditorPreview>
+        </GradientBorderBox>
+      )}
+    </ThemeConsumer>
   );
 }

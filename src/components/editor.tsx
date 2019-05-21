@@ -9,12 +9,17 @@ import EditorTextarea from "../styledComponents/editorTextarea";
 import StatusBarText from "../styledComponents/statusBarText";
 import StatusBarSeperator from "../styledComponents/statusBarSeperator";
 import EditorPreview from "../styledComponents/editorPreview";
+import { ThemeProvider } from "styled-components";
+import getTheme from "../styledComponents/config/themes/getTheme";
+import { EditorTheme, EditorThemeName } from "../styledComponents/config/themes/model";
 
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
 
 export interface EditorProps {
   textAreaProps: TextAreaProps;
   updateContent: (content: string, callback?: () => void) => void;
+  themeName?: EditorThemeName;
+  customTheme?: EditorTheme;
   characterLimit?: number;
   wordLimit?: number;
   headless?: boolean;
@@ -55,50 +60,53 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   public render() {
+    const theme = getTheme(this.props.themeName, this.props.customTheme);
     return (
-      <EditorWrapper>
-        {!this.props.headless && (
-          <EditorActionBar disabled={this.state.isInPreview}>
-            <EditorActionButton onClickMethod={() => this.boldSelection()}>B</EditorActionButton>
-            <EditorActionButton onClickMethod={() => this.italicSelection()}>I</EditorActionButton>
-            <EditorActionButton onClickMethod={() => this.emphasizeSelection()}>E</EditorActionButton>
-            <EditorActionButton onClickMethod={() => this.quoteSelection()}>Q</EditorActionButton>
-            <EditorActionButton onClickMethod={() => this.unOrderedListSelection()}>U</EditorActionButton>
-            <EditorActionButton onClickMethod={() => this.orderedListSelection()}>O</EditorActionButton>
-          </EditorActionBar>
-        )}
+      <ThemeProvider theme={theme}>
+        <EditorWrapper>
+          {!this.props.headless && (
+            <EditorActionBar disabled={this.state.isInPreview}>
+              <EditorActionButton onClickMethod={() => this.boldSelection()}>B</EditorActionButton>
+              <EditorActionButton onClickMethod={() => this.italicSelection()}>I</EditorActionButton>
+              <EditorActionButton onClickMethod={() => this.emphasizeSelection()}>E</EditorActionButton>
+              <EditorActionButton onClickMethod={() => this.quoteSelection()}>Q</EditorActionButton>
+              <EditorActionButton onClickMethod={() => this.unOrderedListSelection()}>U</EditorActionButton>
+              <EditorActionButton onClickMethod={() => this.orderedListSelection()}>O</EditorActionButton>
+            </EditorActionBar>
+          )}
 
-        {this.state.isInPreview && (
-          <EditorPreview>
-            <ReactMarkdown source={this.getTextAreaContent()} />
-          </EditorPreview>
-        )}
+          {this.state.isInPreview && (
+            <EditorPreview>
+              <ReactMarkdown source={this.getTextAreaContent()} />
+            </EditorPreview>
+          )}
 
-        {!this.state.isInPreview && (
-          <EditorTextarea
-            referenceCallback={(c: any) => {
-              this.textarea = c;
-            }}
-            {...this.props.textAreaProps}
-            value={this.getTextAreaContent()}
-            onChange={this.onChange}
-            onKeyUp={this.onKeyUp}
-          />
-        )}
+          {!this.state.isInPreview && (
+            <EditorTextarea
+              referenceCallback={(c: any) => {
+                this.textarea = c;
+              }}
+              {...this.props.textAreaProps}
+              value={this.getTextAreaContent()}
+              onChange={this.onChange}
+              onKeyUp={this.onKeyUp}
+            />
+          )}
 
-        <StatusBar>
-          <EditorActionButton onClickMethod={this.togglePreviewMode}>{this.state.isInPreview ? "Edit" : "Preview"}</EditorActionButton>
-          <StatusBarText>
-            Words: {this.getWordCount()} {this.getWordLimit()}
-          </StatusBarText>
-          <StatusBarSeperator />
-          <StatusBarText>
-            Characters: {this.getCharacterCount()} {this.getCharacterLimit()}
-          </StatusBarText>
-          {!this.state.isInPreview && <StatusBarSeperator />}
-          {!this.state.isInPreview && <StatusBarText>Cursor: {this.getCursorStatus()}</StatusBarText>}
-        </StatusBar>
-      </EditorWrapper>
+          <StatusBar>
+            <EditorActionButton onClickMethod={this.togglePreviewMode}>{this.state.isInPreview ? "Edit" : "Preview"}</EditorActionButton>
+            <StatusBarText>
+              Words: {this.getWordCount()} {this.getWordLimit()}
+            </StatusBarText>
+            <StatusBarSeperator />
+            <StatusBarText>
+              Characters: {this.getCharacterCount()} {this.getCharacterLimit()}
+            </StatusBarText>
+            {!this.state.isInPreview && <StatusBarSeperator />}
+            {!this.state.isInPreview && <StatusBarText>Cursor: {this.getCursorStatus()}</StatusBarText>}
+          </StatusBar>
+        </EditorWrapper>
+      </ThemeProvider>
     );
   }
 
@@ -121,7 +129,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private addEventListeners() {
-    this.selectionUpdateEvents.forEach(eventType => {
+    this.selectionUpdateEvents.forEach((eventType) => {
       if (this.textarea !== null) {
         this.textarea.addEventListener(eventType, this.selectionUpdateListener);
       }
@@ -129,7 +137,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   private removeEventListeners() {
-    this.selectionUpdateEvents.forEach(eventType => {
+    this.selectionUpdateEvents.forEach((eventType) => {
       if (this.textarea !== null) {
         this.textarea.removeEventListener(eventType, this.selectionUpdateListener);
       }

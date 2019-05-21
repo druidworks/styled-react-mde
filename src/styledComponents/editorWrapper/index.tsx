@@ -1,12 +1,18 @@
 import React from "react";
-import BORDER_SIZING from "../config/themes/dark/borderSizing";
 import GradientBorderBox from "../gradientBorderBox";
 import StyledEditorWrapper from "./style";
+import { ThemeConsumer } from "styled-components";
 
 export default function EditorWrapper(props: React.Props<HTMLDivElement>) {
   return (
-    <GradientBorderBox width={BORDER_SIZING.container.size} borderRadius={BORDER_SIZING.container.radius}>
-      <StyledEditorWrapper>{props.children}</StyledEditorWrapper>
-    </GradientBorderBox>
+    <ThemeConsumer>
+      {(theme) => {
+        return (
+          <GradientBorderBox width={theme.components.container.size} borderRadius={theme.components.container.radius}>
+            <StyledEditorWrapper>{props.children}</StyledEditorWrapper>
+          </GradientBorderBox>
+        );
+      }}
+    </ThemeConsumer>
   );
 }

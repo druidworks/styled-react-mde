@@ -1,6 +1,5 @@
 import React from "react";
-import styled from "styled-components";
-import COLORS from "../config/themes/dark/colors";
+import styled, { StyledProps } from "styled-components";
 
 interface StyledGradientBorderBoxProps extends React.Props<HTMLDivElement> {
   borderRadius?: string;
@@ -9,37 +8,36 @@ interface StyledGradientBorderBoxProps extends React.Props<HTMLDivElement> {
 }
 
 const StyledGradientBorderBox = styled.div`
-  padding: ${(props: StyledGradientBorderBoxProps) => props.width || "1px"};
-  background: linear-gradient(to top right, ${COLORS.default.border}, ${COLORS.default.border2}, ${COLORS.default.border3});
+  ${(props: StyledProps<StyledGradientBorderBoxProps>) => {
+    return `
+    padding: ${props.width || "1px"};
+    background: linear-gradient(to top right, ${props.theme.colors.default.border}, ${props.theme.colors.default.border2}, ${props.theme.colors.default.border3});
 
-  ${(props: StyledGradientBorderBoxProps) => {
-    if (props.isHoverable) {
-      return `
+    &.roundCorners {
+      border-radius: ${props.borderRadius || "1px"};
+    }
+
+    ${props.isHoverable &&
+      `
         &:hover {
           background: linear-gradient(
             to top right,
-            ${COLORS.highlight.border},
-            ${COLORS.highlight.border2},
-            ${COLORS.highlight.border3}
+            ${props.theme.colors.highlight.border},
+            ${props.theme.colors.highlight.border2},
+            ${props.theme.colors.highlight.border3}
           );
         }
         &:active, &:focus-within {
           background: linear-gradient(
             to top right,
-            ${COLORS.active.border},
-            ${COLORS.active.border2},
-            ${COLORS.active.border3}
+            ${props.theme.colors.active.border},
+            ${props.theme.colors.active.border2},
+            ${props.theme.colors.active.border3}
           );
         }
-      `;
-    }
-
-    return null;
-  }};
-
-  &.roundCorners {
-    border-radius: ${(props: StyledGradientBorderBoxProps) => props.borderRadius || "1px"};
-  }
+      `}
+    `;
+  }}
 `;
 
 export default StyledGradientBorderBox;

@@ -1,5 +1,6 @@
 import React from "react";
 import StyledGradientBorderBox from "./style";
+import { ThemeConsumer } from "styled-components";
 
 interface GradientBorderBoxProps extends React.Props<HTMLDivElement> {
   borderRadius?: string;
@@ -15,8 +16,12 @@ export default function GradientBorderBox(props: GradientBorderBoxProps) {
     isHoverable: props.isHoverable
   };
   return (
-    <StyledGradientBorderBox className={`${roundCorners}`} {...styledProps}>
-      {props.children}
-    </StyledGradientBorderBox>
+    <ThemeConsumer>
+      {(theme) => (
+        <StyledGradientBorderBox className={`${roundCorners}`} {...styledProps}>
+          {props.children}
+        </StyledGradientBorderBox>
+      )}
+    </ThemeConsumer>
   );
 }

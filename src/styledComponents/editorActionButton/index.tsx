@@ -1,7 +1,7 @@
-import React, { MouseEvent } from "react";
-import BORDER_SIZING from "../config/themes/dark/borderSizing";
+import React from "react";
 import GradientBorderBox from "../gradientBorderBox";
 import StyledEditorActionButton from "./style";
+import { ThemeConsumer } from "styled-components";
 
 interface EditorActionButtonProps extends React.HTMLProps<HTMLDivElement> {
   onClickMethod: () => void;
@@ -9,10 +9,14 @@ interface EditorActionButtonProps extends React.HTMLProps<HTMLDivElement> {
 
 export default function EditorActionButton(props: EditorActionButtonProps) {
   return (
-    <div onClick={props.onClickMethod}>
-      <GradientBorderBox width={BORDER_SIZING.button.size} borderRadius={BORDER_SIZING.button.radius} isHoverable={true}>
-        <StyledEditorActionButton>{props.children}</StyledEditorActionButton>
-      </GradientBorderBox>
-    </div>
+    <ThemeConsumer>
+      {(theme) => (
+        <div onClick={props.onClickMethod}>
+          <GradientBorderBox width={theme.components.button.size} borderRadius={theme.components.button.radius} isHoverable={true}>
+            <StyledEditorActionButton>{props.children}</StyledEditorActionButton>
+          </GradientBorderBox>
+        </div>
+      )}
+    </ThemeConsumer>
   );
 }

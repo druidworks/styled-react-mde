@@ -1,3 +1,4 @@
 {
-  "printWidth": 250
+  "printWidth": 250,
+  "arrowParens": "always"
 }

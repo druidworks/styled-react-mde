@@ -1,38 +1,38 @@
 const COLORS = {
   default: {
-    background: "#1b0535",
-    foreground: "#b5b5b5",
+    background: "#d6b3ff",
+    foreground: "#000000",
     foreground2: "#c576ff",
-    border: "#a0a",
-    border2: "#50f",
-    border3: "#50c",
+    border: "#4e334e",
+    border2: "#4f3584",
+    border3: "#2a1050",
     shadow: ""
   },
   highlight: {
     background: "#340967",
     foreground: "#d0d0d0",
     foreground2: "#c576ff",
-    border: "#a0a",
-    border2: "#a0a",
-    border3: "#50c",
+    border: "#4e334e",
+    border2: "#4e334e",
+    border3: "#2a1050",
     shadow: ""
   },
   active: {
     background: "#4e1098",
     foreground: "#f1e7e7",
     foreground2: "#c576ff",
-    border: "#a0a",
-    border2: "#a0a",
-    border3: "#a0a",
+    border: "#4e334e",
+    border2: "#4e334e",
+    border3: "#4e334e",
     shadow: ""
   },
   disabled: {
     background: "#1b0535",
     foreground: "#523b67",
     foreground2: "#70488e",
-    border: "#0034aa",
-    border2: "#50f",
-    border3: "#50c",
+    border: "#3c393c",
+    border2: "#3c393c",
+    border3: "#3c393c",
     shadow: ""
   }
 };
